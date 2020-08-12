@@ -62,6 +62,6 @@ class Network(tf.keras.Model):
         spectral_vol = self.spectral_conv(spectral_volume)
 
         for_conv_block = tf.concat([spatial_vol,spectral_vol],axis=-1)
-        clean_band = self.convolution_block(for_conv_block)
+        residue = self.convolution_block(for_conv_block)
 
-        return clean_band
+        return residue + spatial_band
