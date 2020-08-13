@@ -2,6 +2,8 @@ import tensorflow as tf
 from model import Network
 from tensorflow.python.keras import backend
 from utils import _loss, _simulate_noise
+from dataset import dataset
+
 
 with backend.get_graph().as_default():
     net = Network(20,20,20)
@@ -10,6 +12,9 @@ with backend.get_graph().as_default():
 num_epochs = 1000
 learning_rate = 0.0001
 noise_level = 1.0
+
+valid_data = dataset(2,False)
+train_data = dataset(2,True)
 
 optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
 
@@ -44,6 +49,28 @@ init_epoch = checkpoint.epoch.numpy()+1
 
 for epoch in range(init_epoch,init_epoch+num_epochs):
 
+    loss_train = tf.constant(0.)
     loss_val = tf.constant(0.)
+    
+    sample_count=1
+    for i,(spatial_image, spectral_volume) in enumerate(train_data._get_aviris()):
+
+        output, loss = train_step(spatial_image,spectral_volume)
+        loss_train += loss
+        sample_count+=1
+
+        print("Train loss for the sample %d is %.2f"%(i+1,loss))
+
+    print("Average train loss for epoch %d is %.2f"%(epoch,loss_train/sample_count))
+
+    sample_count=1
+    for i,(spatial_image, spectral_volume) in enumerate(valid_data._get_aviris()):
+
+        output, loss = valid_step(spatial_image, spectral_volume)
+        loss_val += loss
+        sample_count+=1
+
+    print("Average valid loss for epoch %d is %.2f"%(epoch,loss_val/sample_count))
+
 
 
