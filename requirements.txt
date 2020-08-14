@@ -1,0 +1,3 @@
+tensorflow==2.2.0
+spectral
+numpy==1.16.4
