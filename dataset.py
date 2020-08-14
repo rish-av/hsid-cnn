@@ -1,24 +1,26 @@
 import tensorflow as tf
-import spectral
+import scipy.io as io
 
-#hyperparameter K
+
 #add augmentation if needed
 
+
+#hyperparameter K; the number of spectral bands to consider
 K = 24
 
 class dataset:
     def __init__(self,batch_size,training=True):
         with open("train.txt","r") as fp:
-            self.train_files = list(fp.readlines())
+            self.train_files = list(fp.read().splitlines())
 
         with open("valid.txt","r") as fp:
-            self.valid_file = list(fp.readlines())
+            self.valid_file = list(fp.read().splitlines())
         self.training = training
         self.batch_size = batch_size
 
     def _get_data(self,file):
-        for img_path in range(len(self.file)):
-                image = spectral.open_image(img_path)
+        for img_path in range(len(file)):
+                image = io.loadmat(img_path)
             
                 bands = image.shape[-1]
 
@@ -40,7 +42,9 @@ class dataset:
     def _get_aviris(self):
         data = tf.data.Dataset.from_generator(self._aviris_generator)
         data = data.batch(self.batch_size)
+        data = data.cache()
         data = data.prefetch(2)
+        data = data.repeat()
         return data
 
 
