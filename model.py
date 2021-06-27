@@ -51,17 +51,17 @@ def convolution_block(volume,num_filters):
     return tf.keras.Model(inputs=volume,outputs=clean_band,name='convolution_block')
 
 class Network(tf.keras.Model):
-    def __init__(self,num_3d_filters,num_2d_filters,num_conv_filters):
+    def __init__(self,num_3d_filters,num_2d_filters,num_conv_filters,K=24):
         super(Network,self).__init__()
-        self.spectral_conv = spectral_conv(tf.keras.Input(shape=(None,None,None,None)),num_3d_filters)
-        self.spatial_conv = spatial_conv(tf.keras.Input(shape=(None,None)),num_2d_filters)
-        self.convolution_block = convolution_block(tf.keras.Input(shape=(None,None,None)),num_conv_filters)
+        self.spectral_conv = spectral_conv(tf.keras.Input(shape=(None,None,None,K)),num_3d_filters)
+        self.spatial_conv = spatial_conv(tf.keras.Input(shape=(None,None,1)),num_2d_filters)
+        self.convolution_block = convolution_block(tf.keras.Input(shape=(None,None,num_3d_filters*3 + num_2d_filters*3)),num_conv_filters)
     
     def call(self,spatial_band,spectral_volume):
         spatial_vol = self.spatial_conv(spatial_band)
         spectral_vol = self.spectral_conv(spectral_volume)
 
-        for_conv_block = tf.concat([spatial_vol,spectral_vol],axis=-1)
+        for_conv_block = tf.concat([spatial_vol[:,:,:,0,:],spectral_vol],axis=-1)
         residue = self.convolution_block(for_conv_block)
 
         return residue + spatial_band

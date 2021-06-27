@@ -1,20 +1,32 @@
 import tensorflow as tf
 from model import Network
 from tensorflow.python.keras import backend
-from utils import _loss, _simulate_noise
+from utils import _loss, _simulate_noise, AttrDict
 from dataset import dataset
 from metrics import _psnr,_ssim
+import yaml
+import argparse
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--config-file',help='path to the config file')
+args = parser.parse_args()
+
+with open(args.config_file) as fp:
+    config = yaml.load(fp)
+    config = AttrDict(config)
 
 with backend.get_graph().as_default():
-    net = Network(20,20,20)
+    net = Network(config.num_conv3d_filters,config.num_conv2d_filters,config.num_convolutionblock_filters)
 
-checkpoint_path = None
-num_epochs = 1000
-learning_rate = 0.0001
-noise_level = 1.0
+checkpoint_path = config.ckpt_path
+num_epochs = config.epochs
+learning_rate = config.lr
+noise_level = config.noise_level
+batch_size = config.batch_size
 
-valid_data = dataset(2,False)
-train_data = dataset(2,True)
+valid_data = dataset(batch_size,config,False)
+train_data = dataset(batch_size,config,True)
 
 optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
 

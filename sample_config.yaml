@@ -1,0 +1,8 @@
+lr: 0.0001
+train_file: './data/train.txt'
+valid_file: './data/valid.txt'
+batch_size: 2
+checkpoint_path: './ckpt/ckpt-001'
+K: 24
+noise_level: 1.0
+epochs: 100

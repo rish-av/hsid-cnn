@@ -1,22 +1,23 @@
 import tensorflow as tf
 import scipy.io as io
-
-
-#add augmentation if needed
-
+import numpy as np
 
 #hyperparameter K; the number of spectral bands to consider
-K = 24
 
 class dataset:
-    def __init__(self,batch_size,training=True):
-        with open("train.txt","r") as fp:
+    def __init__(self,batch_size,config,training=True):
+
+        train_file_path = config.train_file
+        valid_file_path = config.valid_file
+        with open(train_file_path,"r") as fp:
             self.train_files = list(fp.read().splitlines())
 
-        with open("valid.txt","r") as fp:
+        with open(valid_file_path,"r") as fp:
             self.valid_file = list(fp.read().splitlines())
         self.training = training
         self.batch_size = batch_size
+
+        self.K = config.K
 
     def _get_data(self,file):
         for img_path in range(len(file)):
@@ -26,7 +27,8 @@ class dataset:
 
                 for i in range(0,bands-K):
                     spatial_image = image[:,:,i]
-                    spectral_volume = image[:,:,i+K]
+                    spectral_volume = image[:,:,i+self.K]
+                    spectral_image = image[:,:,np.newaxis]
 
                     return spatial_image, spectral_volume
 
