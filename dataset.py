@@ -18,17 +18,21 @@ class dataset:
         self.batch_size = batch_size
 
         self.K = config.K
+        self.crop_size = config.crop_size
 
     def _get_data(self,file):
         for img_path in range(len(file)):
                 image = io.loadmat(img_path)
-            
+                key = image.keys()[-1]
+                image = image[key]
+
+                cropped_image = tf.image.random_crop(image, (self.crop_size, self.crop_size, bands))
                 bands = image.shape[-1]
 
-                for i in range(0,bands-K):
+                for i in range(0,bands-self.K):
                     spatial_image = image[:,:,i]
-                    spectral_volume = image[:,:,i+self.K]
-                    spectral_image = image[:,:,np.newaxis]
+                    spectral_volume = image[:,:,i:i+self.K]
+                    spatial_image = spatial_image[:,:,np.newaxis]
 
                     return spatial_image, spectral_volume
 
@@ -48,6 +52,3 @@ class dataset:
         data = data.prefetch(2)
         data = data.repeat()
         return data
-
-
-
