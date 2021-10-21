@@ -20,14 +20,13 @@ class dataset:
         self.K = config.K
         self.crop_size = config.crop_size
 
-    def _get_data(self,file):
-        for img_path in range(len(file)):
+    def _get_data(self,files):
+        for img_path in files:
                 image = io.loadmat(img_path)
-                key = image.keys()[-1]
+                key = list(image.keys())[-1]
                 image = image[key]
-
-                cropped_image = tf.image.random_crop(image, (self.crop_size, self.crop_size, bands))
                 bands = image.shape[-1]
+                cropped_image = tf.image.random_crop(image, (self.crop_size, self.crop_size, bands))
 
                 for i in range(0,bands-self.K):
                     spatial_image = image[:,:,i]
@@ -46,7 +45,7 @@ class dataset:
 
     
     def _get_aviris(self):
-        data = tf.data.Dataset.from_generator(self._aviris_generator)
+        data = tf.data.Dataset.from_generator(self._aviris_generator, output_types = (tf.float32, tf.float32))
         data = data.batch(self.batch_size)
         data = data.cache()
         data = data.prefetch(2)

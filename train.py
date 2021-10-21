@@ -25,8 +25,8 @@ learning_rate = config.lr
 noise_level = config.noise_level
 batch_size = config.batch_size
 
-valid_data = dataset(batch_size,config,False)
-train_data = dataset(batch_size,config,True)
+valid_data = dataset(batch_size,config,False)._get_aviris()
+train_data = dataset(batch_size,config,True)._get_aviris()
 
 optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
 
@@ -37,7 +37,7 @@ ckpt_manager = tf.train.CheckpointManager(checkpoint,directory="./checkpoints",m
 train_summary_writer = tf.summary.create_file_writer('./summaries/train')
 valid_summary_writer = tf.summary.create_file_writer('./summaries/valid')
 
-if checkpoint_path!=None:
+if checkpoint_path:
     net.load_weights(checkpoint_path)
 
 
@@ -49,7 +49,7 @@ def train_step(spatial_band,spectral_volume):
         out = net(spatial_band_noised,spectral_volume_noised)
         loss_val = _loss(spatial_band,out)
     grads = tape.gradient(loss_val,net.trainable_weights)
-    optimizer.apply(zip(grads,net.trainable_weights))
+    optimizer.apply_gradients(zip(grads,net.trainable_weights))
     
     return loss_val, out
 
@@ -63,7 +63,7 @@ def valid_step(spatial_band,spectral_volume):
 
     return loss_val, out
 
-init_epoch = checkpoint.epoch.numpy()+1 
+init_epoch = int(checkpoint.epoch.numpy())+1 
 
 for epoch in range(init_epoch,init_epoch+num_epochs):
 
@@ -77,9 +77,9 @@ for epoch in range(init_epoch,init_epoch+num_epochs):
     ssim_val = tf.constant(0.)
     
     sample_count=1
-    for i,(spatial_image, spectral_volume) in enumerate(train_data._get_aviris()):
+    for i,(spatial_image, spectral_volume) in enumerate(train_data):
 
-        output, loss = train_step(spatial_image,spectral_volume)
+        loss, output = train_step(spatial_image,spectral_volume)
         loss_train += loss
         psnr_train += _psnr(spatial_image,output)
         ssim_train += _ssim(spatial_image,output)
@@ -95,9 +95,9 @@ for epoch in range(init_epoch,init_epoch+num_epochs):
     print("Average train loss for epoch %d is %.2f"%(epoch,loss_train/sample_count))
 
     sample_count=1
-    for i,(spatial_image, spectral_volume) in enumerate(valid_data._get_aviris()):
+    for i,(spatial_image, spectral_volume) in enumerate(valid_data):
 
-        output, loss = valid_step(spatial_image, spectral_volume)
+        loss, output = valid_step(spatial_image, spectral_volume)
         loss_val += loss
         psnr_val += _psnr(spatial_image,output)
         ssim_val += _ssim(spatial_image,output)
@@ -126,6 +126,3 @@ for epoch in range(init_epoch,init_epoch+num_epochs):
         ckpt_manager.save(checkpoint_number=epoch)
 
 print("Training complete... best weights are saved!")
-
-
-

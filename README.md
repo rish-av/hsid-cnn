@@ -2,7 +2,7 @@
 Tensorflow 2.0 Implementation of HSID-CNN for denoising hyperspectral images.
 
 - Dataset Preparation & Environment Preparation
-  - Prepare two file `train.txt` & `valid.txt` with the paths to hyperspectral images.
+  - Prepare two file `train.txt` & `valid.txt` with the paths to hyperspectral images (see data folder)
   - Add the paths of the files into a config file, `sample_config.yaml` is an example.
   - Install the requirements with `pip install -r requirements.txt`
  
