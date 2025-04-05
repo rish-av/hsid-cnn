@@ -18,4 +18,4 @@ Tensorflow 2.0 Implementation of HSID-CNN for denoising hyperspectral images.
 - Original Paper: [HSID-CNN](https://arxiv.org/pdf/1806.00183.pdf)
 
 
-*Note -- I cannot release the pretrained models publically, if you want it, please shoot me an email. The code is strictly for academic purposes only!*
+Archived: I do not maintain this repo anymore, you can still shoot me an email for any query but cannot guarantee as response.
